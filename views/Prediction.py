@@ -18,6 +18,13 @@ Maruti = pd.read_csv(r"model_data/datasets/Maruti.csv")
 reliance = pd.read_csv(r"model_data/datasets/Reliance.csv")
 TATA = pd.read_csv(r"model_data/datasets/TATA.csv")
 
+bajaj_model = tf.keras.models.load_model(rf"model_data/models/Bajaj/Bajaj_model.h5")
+hdfc_model  = tf.keras.models.load_model(rf"model_data/models/HDFC/HDFC_model.h5")
+Maruti_model = tf.keras.models.load_model(rf"model_data/models/Maruti/Maruti_model.h5")
+reliance_model = tf.keras.models.load_model(rf"model_data/models/Reliance/Reliance_model.h5")
+TATA_model = tf.keras.models.load_model(rf"model_data/models/TATA/TATA_model.h5")
+
+
 def scaler_loader(name):
     with open(rf"model_data/models/{name}/{name}_scaler.pkl", 'rb') as f:
         scaler = pickle.load(f)
@@ -29,12 +36,6 @@ def create_sequences(data, window_size):
     sequences.append(data[0:0 + window_size])
     return np.array(sequences)
 
-Names = {"Bajaj Finance Ltd.":"Bajaj",
-            "HDFC Bank Ltd." : "HDFC",
-            "Maruti Suzuki India Ltd." : "Maruti",
-            "Reliance Industries Ltd." : "Reliance",
-            "Tata Consultancy Services Ltd.": "TATA"}
-
 Dataset = {"Bajaj Finance Ltd.":bajaj,
             "HDFC Bank Ltd." : hdfc,
             "Maruti Suzuki India Ltd." : Maruti,
@@ -42,17 +43,17 @@ Dataset = {"Bajaj Finance Ltd.":bajaj,
             "Tata Consultancy Services Ltd.": TATA}
 
 models = {
-    "Bajaj Finance Ltd.":[ "", scaler_loader("Bajaj")],
-    "HDFC Bank Ltd." :["" , scaler_loader("HDFC")],
-    "Maruti Suzuki India Ltd." : ["" , scaler_loader("Maruti")],
-    "Reliance Industries Ltd.": ["" , scaler_loader("Reliance")],
-    "Tata Consultancy Services Ltd." : ["", scaler_loader("TATA")]
+    "Bajaj Finance Ltd.":[bajaj_model , scaler_loader("Bajaj")],
+    "HDFC Bank Ltd." :[hdfc_model , scaler_loader("HDFC")],
+    "Maruti Suzuki India Ltd." : [Maruti_model , scaler_loader("Maruti")],
+    "Reliance Industries Ltd.": [reliance_model , scaler_loader("Reliance")],
+    "Tata Consultancy Services Ltd." : [TATA_model, scaler_loader("TATA")]
 }
 
-comp = st.selectbox("""### Select a Company""",['Bajaj Finance Ltd.','HDFC Bank Ltd.','Maruti Suzuki India Ltd.','Reliance Industries Ltd.','Tata Consultancy Services Ltd.'],index = None)
+comp = st.selectbox(" Select a Company",['Bajaj Finance Ltd.','HDFC Bank Ltd.','Maruti Suzuki India Ltd.','Reliance Industries Ltd.','Tata Consultancy Services Ltd.'],index = None)
 
 if comp != None:
-    model = tf.keras.models.load_model(rf"model_data/models/{Names[comp]}/{Names[comp]}_model.h5")
+    model = models[comp][0]
     scaler = models[comp][1]
 
     dataset = Dataset[comp]
@@ -81,7 +82,7 @@ if comp != None:
     st.write(" ")
 
 
-    n = st.text_input("""### Enter the no. of days you want to get the prediction""",None)
+    n = st.text_input("# Enter the no. of days you want to get the prediction",None)
     b = st.button(" Predict",use_container_width=True,key = 10)
     if n != None:
         n = int(n)
